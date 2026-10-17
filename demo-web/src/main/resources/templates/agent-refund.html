@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Refund · NovaShop</title>
+  <link rel="stylesheet" th:href="@{/css/demo.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main>
+  <h1>Refund</h1>
+  <p class="lead mono" th:text="${refund.id}">rf</p>
+  <section class="panel">
+    <p><strong>Status</strong> <span class="mono" th:text="${refund.status}">STATUS</span></p>
+    <p><strong>Return</strong> <span class="mono" th:text="${refund.returnRequestId}">ret</span></p>
+    <p><strong>Payment</strong> <span class="mono" th:text="${refund.paymentId}">pay</span></p>
+    <p><strong>Amount</strong>
+      <span th:text="${refund.amount} + ' ' + ${refund.currency}">0</span></p>
+    <h2>ExternalExecution</h2>
+    <p th:if="${refund.latestExecution == null}" class="meta">No execution yet.</p>
+    <div th:if="${refund.latestExecution != null}">
+      <p><strong>Execution status</strong>
+        <span class="mono" th:text="${refund.latestExecution.status}">STATUS</span></p>
+      <p><strong>Attempts</strong>
+        <span th:text="${refund.latestExecution.attemptCount}">0</span></p>
+      <p><strong>Idempotency key</strong>
+        <span class="mono" th:text="${refund.latestExecution.idempotencyKey}">key</span></p>
+      <p th:if="${refund.latestExecution.lastError != null}">
+        <strong>Last error</strong>
+        <span th:text="${refund.latestExecution.lastError}">err</span>
+      </p>
+    </div>
+  </section>
+  <p class="meta" th:if="${message}" th:text="${message}">flash</p>
+  <div class="actions">
+    <form th:action="@{/agent/refunds/{id}/simulate-psp-success(id=${refund.id})}" method="post"
+          th:if="${refund.status == 'PENDING_EXTERNAL_EXECUTION'
+            or (refund.latestExecution != null and refund.latestExecution.status == 'IN_PROGRESS')}">
+      <button type="submit">Simulate PSP callback success (demo only)</button>
+    </form>
+    <a class="btn secondary" th:href="@{/agent/returns}">Back to returns</a>
+    <a class="btn secondary" th:href="@{/}">Catalog</a>
+  </div>
+  <p class="meta">With <code>PSP_MODE=CALLBACK_LATER</code>, status stays
+    <code>PENDING_EXTERNAL_EXECUTION</code> until the PSP callback (see smoke-phase2).
+    The button above is a <strong>teaching-only</strong> shortcut that POSTs
+    <code>/psp/callbacks/refunds</code> — not a real PSP.</p>
+</main>
+</body>
+</html>

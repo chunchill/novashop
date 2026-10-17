@@ -1,0 +1,138 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-novashop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-novashop}
+      # Default DB is unused by apps; init script creates order_return + payment_refund + commerce
+      POSTGRES_DB: postgres
+    ports:
+      # Default host 5432; override POSTGRES_HOST_PORT if the host port is taken
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - ./docker/postgres/init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql:ro
+      - novashop-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-novashop} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  order-return:
+    build:
+      context: .
+      dockerfile: order-return/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_return
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-novashop}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-novashop}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-guest}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  payment-refund:
+    build:
+      context: .
+      dockerfile: payment-refund/Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payment_refund
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-novashop}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-novashop}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-guest}
+      # Stable middle state for smoke: refund stays PENDING_EXTERNAL_EXECUTION until callback
+      PSP_MODE: ${PSP_MODE:-CALLBACK_LATER}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  commerce:
+    build:
+      context: .
+      dockerfile: commerce/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/commerce
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-novashop}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-novashop}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-guest}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  fulfillment:
+    build:
+      context: .
+      dockerfile: fulfillment/Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/fulfillment
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-novashop}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-novashop}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:-guest}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  demo-web:
+    build:
+      context: .
+      dockerfile: demo-web/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      COMMERCE_URL: http://commerce:8083
+      ORDER_RETURN_URL: http://order-return:8081
+      PAYMENT_REFUND_URL: http://payment-refund:8082
+      FULFILLMENT_URL: http://fulfillment:8084
+    depends_on:
+      commerce:
+        condition: service_healthy
+      order-return:
+        condition: service_healthy
+      payment-refund:
+        condition: service_healthy
+      fulfillment:
+        condition: service_healthy
+
+volumes:
+  novashop-pgdata:

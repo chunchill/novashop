@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Agent returns · NovaShop</title>
+  <link rel="stylesheet" th:href="@{/css/demo.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main>
+  <h1>Agent returns</h1>
+  <p class="lead">Pending returns — approve with X-Actor headers (simulated via form).</p>
+  <div class="flash" th:if="${message}" th:text="${message}"></div>
+
+  <section class="panel" th:if="${#lists.isEmpty(returns)}">
+    <p class="meta">No pending returns. Place an order and use “Request return for order”.</p>
+  </section>
+
+  <section class="panel" th:each="r : ${returns}">
+    <h2 class="mono" th:text="${r.id}">ret</h2>
+    <p class="meta">
+      payment <span class="mono" th:text="${r.paymentId}">pay</span> ·
+      refundable <span th:text="${r.refundableTotal} + ' ' + ${r.currency}">0</span>
+    </p>
+    <p class="meta">lines:
+      <span th:each="l, iter : ${r.lines}">
+        <span class="mono" th:text="${l.orderLineId}">L1</span>
+        <span th:text="'×' + ${l.remainingRefundableQty}">×1</span>
+        <span th:if="${!iter.last}">, </span>
+      </span>
+    </p>
+    <form th:action="@{/agent/returns/{id}/approve(id=${r.id})}" method="post" class="stack">
+      <div>
+        <label for="actorId">X-Actor-Id</label>
+        <input id="actorId" name="actorId" value="demo-supervisor" required/>
+      </div>
+      <div>
+        <label for="actorRole">X-Actor-Role</label>
+        <select id="actorRole" name="actorRole">
+          <option value="SUPERVISOR" selected>SUPERVISOR</option>
+          <option value="AGENT">AGENT</option>
+        </select>
+      </div>
+      <div>
+        <label for="refundAmount">Refund amount</label>
+        <input id="refundAmount" name="refundAmount" th:value="${r.refundableTotal}" required/>
+      </div>
+      <div>
+        <label for="reason">Reason</label>
+        <input id="reason" name="reason" value="demo-approve" required/>
+      </div>
+      <input type="hidden" name="resolutionCode" value="FULL"/>
+      <div class="actions">
+        <button type="submit">Approve return</button>
+      </div>
+    </form>
+  </section>
+</main>
+</body>
+</html>

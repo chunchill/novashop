@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Catalog · NovaShop</title>
+  <link rel="stylesheet" th:href="@{/css/demo.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main>
+  <h1>Catalog</h1>
+  <p class="lead">Teaching shop — browse SKUs → place an order → see fulfillment on the order page → agent returns.</p>
+  <div class="stack">
+    <section class="panel" th:each="p : ${products}">
+      <h2 th:text="${p.name}">Product</h2>
+      <p class="meta" th:text="${p.description}">desc</p>
+      <div class="sku-row" th:each="s : ${p.skus}">
+        <div>
+          <div th:text="${s.name}">SKU</div>
+          <div class="mono meta" th:text="${s.skuId}">sku</div>
+        </div>
+        <div th:text="${s.unitPrice} + ' ' + ${s.currency}">0 CNY</div>
+      </div>
+    </section>
+  </div>
+  <div class="actions">
+    <a class="btn" th:href="@{/orders/new}">Place order</a>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Place order · NovaShop</title>
+  <link rel="stylesheet" th:href="@{/css/demo.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main>
+  <h1>Place order</h1>
+  <p class="lead">Select quantities. Commerce mints a paymentId and refundableTotal.</p>
+  <div class="flash error" th:if="${error}" th:text="${error}"></div>
+  <form th:action="@{/orders}" method="post" class="stack">
+    <section class="panel" th:each="p : ${products}">
+      <h2 th:text="${p.name}">Product</h2>
+      <div class="sku-row" th:each="s : ${p.skus}">
+        <div>
+          <div th:text="${s.name}">SKU</div>
+          <div class="mono meta" th:text="${s.skuId}">sku</div>
+        </div>
+        <div th:text="${s.unitPrice} + ' ' + ${s.currency}">0</div>
+        <div>
+          <label th:for="${'qty_' + s.skuId}">Qty</label>
+          <input type="number" min="0" value="0"
+                 th:id="${'qty_' + s.skuId}"
+                 th:name="${'qty_' + s.skuId}"/>
+        </div>
+      </div>
+    </section>
+    <div class="actions">
+      <button type="submit">Create order</button>
+    </div>
+  </form>
+</main>
+</body>
+</html>

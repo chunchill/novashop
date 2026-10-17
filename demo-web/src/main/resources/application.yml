@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: demo-web
+  thymeleaf:
+    cache: false
+
+novashop:
+  services:
+    commerce-url: ${COMMERCE_URL:http://localhost:8083}
+    order-return-url: ${ORDER_RETURN_URL:http://localhost:8081}
+    payment-refund-url: ${PAYMENT_REFUND_URL:http://localhost:8082}
+    fulfillment-url: ${FULFILLMENT_URL:http://localhost:8084}
+
+logging:
+  level:
+    com.novashop.demoweb: INFO

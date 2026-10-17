@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="nav" class="top">
+  <a class="brand" th:href="@{/}">NovaShop</a>
+  <nav aria-label="Demo flows">
+    <span class="nav-group">Customer</span>
+    <a th:href="@{/}">Catalog</a>
+    <a th:href="@{/orders/new}">Place order</a>
+    <span class="nav-group">Agent</span>
+    <a th:href="@{/agent/returns}">Pending returns</a>
+  </nav>
+</header>
+</body>
+</html>

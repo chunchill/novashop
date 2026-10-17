@@ -1,0 +1,37 @@
+/**
+ * Teaching layout:
+ * - src/main → DDD layers (domain / application / infrastructure / interfaces)
+ * - src/test → pyramid: unit/ and integration/ (packages *.unit.* / *.integration.*)
+ * - e2e/    → Compose smoke (not JUnit)
+ *
+ * `./gradlew test`              → all tests under src/test
+ * `./gradlew unitTest`          → *.unit.*
+ * `./gradlew integrationTest`   → *.integration.*
+ */
+tasks.named('test', Test) {
+    useJUnitPlatform()
+}
+
+tasks.register('unitTest', Test) {
+    description = 'Runs unit tests (packages matching *.unit.*).'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching('*.unit.*')
+        setFailOnNoMatchingTests(false) // platform may be unit-only
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests (packages matching *.integration.*).'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching('*.integration.*')
+        setFailOnNoMatchingTests(false) // platform has no integration tests yet
+    }
+}

@@ -1,0 +1,40 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: payment-refund
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/payment_refund}
+    username: ${SPRING_DATASOURCE_USERNAME:novashop}
+    password: ${SPRING_DATASOURCE_PASSWORD:novashop}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+
+novashop:
+  psp:
+    # SUCCESS_SYNC | FAIL | CALLBACK_LATER (env PSP_MODE)
+    mode: ${PSP_MODE:SUCCESS_SYNC}
+  outbox:
+    poll-ms: 5000
+  messaging:
+    return-approved-exchange: novashop.return.approved
+    return-approved-queue: payment-refund.return-approved
+    return-approved-routing-key: return.approved
+    refund-terminal-exchange: novashop.refund.terminal
+    refund-terminal-routing-key: refund.terminal
+
+logging:
+  level:
+    com.novashop.paymentrefund: INFO

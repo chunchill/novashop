@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Order · NovaShop</title>
+  <link rel="stylesheet" th:href="@{/css/demo.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main>
+  <h1>Order</h1>
+  <p class="lead mono" th:text="${order.orderId}">ord</p>
+  <section class="panel">
+    <p><strong>Payment</strong> <span class="mono" th:text="${order.paymentId}">pay</span></p>
+    <p><strong>Total</strong>
+      <span th:text="${order.total} + ' ' + ${order.currency}">0</span></p>
+    <p><strong>Refundable</strong>
+      <span th:text="${order.refundableTotal} + ' ' + ${order.currency}">0</span></p>
+    <table>
+      <thead>
+      <tr><th>Line</th><th>SKU</th><th>Qty</th><th>Unit</th><th>Inventory</th></tr>
+      </thead>
+      <tbody>
+      <tr th:each="l : ${order.lines}">
+        <td class="mono" th:text="${l.lineId}">L1</td>
+        <td th:text="${l.skuName}">name</td>
+        <td th:text="${l.quantity}">1</td>
+        <td th:text="${l.unitPrice}">0</td>
+        <td class="mono" th:with="inv=${inventoryBySku[l.skuId]}">
+          <span th:if="${inv != null}"
+                th:text="'onHand=' + ${inv.onHand} + ' reserved=' + ${inv.reserved} + ' avail=' + ${inv.available}">inv</span>
+          <span th:if="${inv == null}" class="meta">n/a</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="panel">
+    <h2>Fulfillment</h2>
+    <p th:if="${fulfillment == null}" class="meta">
+      Waiting for OrderPlaced → fulfillment (poll / refresh; outbox ~5s).
+    </p>
+    <div th:if="${fulfillment != null}">
+      <p><strong>Status</strong> <span class="mono" th:text="${fulfillment.status}">STATUS</span></p>
+      <p><strong>Id</strong> <span class="mono" th:text="${fulfillment.id}">ful</span></p>
+      <p th:if="${fulfillment.warehouseCode != null}">
+        <strong>Warehouse</strong>
+        <span class="mono" th:text="${fulfillment.warehouseCode}">WH</span>
+      </p>
+      <p th:if="${fulfillment.rejectReason != null}">
+        <strong>Reject reason</strong>
+        <span th:text="${fulfillment.rejectReason}">reason</span>
+      </p>
+    </div>
+  </section>
+  <div class="actions">
+    <form th:action="@{/agent/returns/from-order}" method="post">
+      <input type="hidden" name="orderId" th:value="${order.orderId}"/>
+      <button type="submit">Request return for order</button>
+    </form>
+    <a class="btn secondary" th:href="@{/agent/returns}">Agent console</a>
+    <a class="btn secondary" th:href="@{/orders/{id}(id=${order.orderId})}">Refresh</a>
+  </div>
+</main>
+</body>
+</html>
