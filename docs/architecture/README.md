@@ -10,12 +10,14 @@
 | Context / Container / Component | `flowchart` + `subgraph` 分层 | 声明顺序 ≈ 视觉层次，线少、方向单一 |
 | Dynamic（协作） | `sequenceDiagram` | 天生适合编号步骤，无蜘蛛网 |
 
-| 文档 | 内容 |
-|------|------|
-| [01-context.md](./01-context.md) | 系统上下文 |
-| [02-container.md](./02-container.md) | 容器：HTTP 面 · 异步面 · 持久化说明 |
-| [03-component-return-refund.md](./03-component-return-refund.md) | 售后两服务的分层组件 |
-| [04-dynamic-approve-refund.md](./04-dynamic-approve-refund.md) | 审批→退款时序 |
+| 文档 | 内容 | 表达模型 |
+|------|------|----------|
+| [01-context.md](./01-context.md) | 系统上下文 | C4 L1（flowchart） |
+| [02-container.md](./02-container.md) | 容器与通信 | C4 L2（flowchart） |
+| [03-component-return-refund.md](./03-component-return-refund.md) | 售后分层组件 | C4 L3（flowchart） |
+| [04-dynamic-approve-refund.md](./04-dynamic-approve-refund.md) | 审批→退款协作 | C4 Dynamic（sequence） |
+| [05-tech-stack.md](./05-tech-stack.md) | 技术栈与版本 | **Stack inventory**（非 C4） |
+| [adr/](./adr/) | 非显然选型 | **ADR** |
 
 **不做 Code 级图** → [handbook/03](../handbook/03-layered-code-tour.md)  
 **不做生产 Deployment** → [handbook/05](../handbook/05-runbook-docker.md)

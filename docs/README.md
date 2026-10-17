@@ -15,6 +15,8 @@ docs/
 | 想… | 打开 |
 |-----|------|
 | 先看系统长什么样（C4） | [architecture/README.md](architecture/README.md) |
+| 技术栈 / 版本 / 前置 | [architecture/05-tech-stack.md](architecture/05-tech-stack.md) |
+| 为何这样选（ADR） | [architecture/adr/](architecture/adr/) |
 | 按课表学 | [handbook/README.md](handbook/README.md) |
 | 2 小时自学实验 | [handbook/09-lab-2h.md](handbook/09-lab-2h.md) |
 | 概念卡（DDD + Ontology） | [handbook/00-concept-playbook.md](handbook/00-concept-playbook.md) |

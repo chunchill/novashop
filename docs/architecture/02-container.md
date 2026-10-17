@@ -103,4 +103,5 @@ flowchart LR
 | order-return | 8081 | Return Management |
 | payment-refund | 8082 | Refund（捕获 deferred） |
 
+技术版本清单 → [05-tech-stack.md](./05-tech-stack.md)  
 下一层 → [03-component-return-refund.md](./03-component-return-refund.md)
