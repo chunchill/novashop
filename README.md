@@ -43,6 +43,7 @@ chmod +x scripts/*.sh
 | 路径 | 给谁 | 内容 |
 |------|------|------|
 | [docs/README.md](docs/README.md) | 所有人 | 文档地图 |
+| [docs/architecture/](docs/architecture/) | 先看结构 | **C4**：Context → Container → Component → Dynamic |
 | [docs/handbook/](docs/handbook/) | 学员主路径 | 概念卡 → 映射 → 分层走读 → 测试 → Runbook → 实验单 |
 | [docs/handbook/09-lab-2h.md](docs/handbook/09-lab-2h.md) | 自学 2 小时 | 跑 → 点 → 改测 |
 | [docs/theory/](docs/theory/) | 深读 | Ontology / DDD 架构 / 范式关系 |
@@ -58,6 +59,7 @@ chmod +x scripts/*.sh
 .
 ├── README.md                 ← 你在这里
 ├── docs/
+│   ├── architecture/         # C4 架构图（Context / Container / Component）
 │   ├── handbook/             # 学习主路径（00–09 + roadmap）
 │   ├── theory/               # 理论深读 + figures
 │   └── design/               # 案例设计规格

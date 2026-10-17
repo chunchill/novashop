@@ -6,6 +6,7 @@
 
 ```text
 docs/
+├── architecture/ # C4 架构总览（结构入口）
 ├── handbook/     # 学习主路径（先读这里）
 ├── theory/       # 理论深读（手册卡片上的「深读」链接）
 └── design/       # 设计规格（范围、API、成功标准）
@@ -13,6 +14,7 @@ docs/
 
 | 想… | 打开 |
 |-----|------|
+| 先看系统长什么样（C4） | [architecture/README.md](architecture/README.md) |
 | 按课表学 | [handbook/README.md](handbook/README.md) |
 | 2 小时自学实验 | [handbook/09-lab-2h.md](handbook/09-lab-2h.md) |
 | 概念卡（DDD + Ontology） | [handbook/00-concept-playbook.md](handbook/00-concept-playbook.md) |
@@ -28,6 +30,6 @@ docs/
 
 ## 给维护者
 
-- **学员可见、应随代码发布：** `handbook/`、`theory/`、`design/`
+- **学员可见、应随代码发布：** `architecture/`、`handbook/`、`theory/`、`design/`
 - **研究单仓内的写作草稿 / 执行计划：** 仍可留在上级仓库的 `docs/superpowers/`，不必随 NovaShop 公开仓发布
-- 改手册内链时保持相对路径：`../theory/…`、`../design/…`
+- 改手册内链时保持相对路径：`../theory/…`、`../design/…`、`../architecture/…`

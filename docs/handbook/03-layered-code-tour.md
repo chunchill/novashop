@@ -2,7 +2,8 @@
 
 按 Evans 四层（实用版 + 端口倒置）走读本仓库根。依赖方向：**interfaces / infrastructure → application → domain**；domain **零** Spring / JPA。
 
-架构深读 → [ddd-application-architectures.md](../theory/ddd-application-architectures.md) §2。
+架构深读 → [ddd-application-architectures.md](../theory/ddd-application-architectures.md) §2。  
+系统地图（C4）→ [../architecture/README.md](../architecture/README.md)；售后组件图 → [../architecture/03-component-return-refund.md](../architecture/03-component-return-refund.md)。
 
 ---
 

@@ -74,6 +74,7 @@ open http://localhost:8080/   # 或手动打开
 
 | 步 | 读什么 | 做什么 |
 |----|--------|--------|
+| — | [../architecture/README.md](../architecture/README.md) | （可选）C4 Context → Container，建立系统地图 |
 | 0 | [00-concept-playbook.md](./00-concept-playbook.md) | 扫 DDD + Ontology 概念卡；打开锚点类 |
 | 1 | [01-concepts-bridge.md](./01-concepts-bridge.md) | 分清「Foundry 操作层」与本标本 |
 | 2 | [02-ontology-to-ddd-map.md](./02-ontology-to-ddd-map.md) | edit-set 翻译表；`refundId` 与两一致性边界 |
