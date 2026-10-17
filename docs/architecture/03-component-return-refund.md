@@ -1,73 +1,81 @@
-# C4 Level 3 · Component（售后切片）
+# Level 3 · Component（售后切片）
 
-两个服务**分图竖向排列**（interfaces → application → domain ← infrastructure），避免左右对打交叉线。  
-类级走读 → [handbook/03-layered-code-tour.md](../handbook/03-layered-code-tour.md)。
+只展开售后两服务。阅读方向：**上 → 下**（接口 → 应用 → 领域；基础设施挂在侧枝）。  
+类级走读 → [handbook/03](../handbook/03-layered-code-tour.md)。
 
 ---
 
 ## 3.1 order-return
 
 ```mermaid
-C4Component
-  title Components — order-return
-  UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="1")
+flowchart TB
+  api["ReturnController<br/><i>interfaces</i>"]
+  app["ApproveReturnHandler<br/><i>application</i>"]
+  dom["ReturnRequest<br/><i>domain</i>"]
 
-  Container_Boundary(or, "order-return :8081") {
-    Component(api, "ReturnController", "interfaces", "HTTP + X-Actor-*")
-    Component(app, "ApproveReturnHandler", "application", "Txn + outbox enqueue")
-    Component(dom, "ReturnRequest", "domain", "Aggregate; mint refundId")
-    Component(repo, "JpaReturnRequestRepository", "infrastructure", "Persistence")
-    Component(outbox, "OutboxPublisherJob", "infrastructure", "Publish ReturnApproved")
-    Component(listen, "RefundTerminalListener", "infrastructure", "Project terminal state")
-  }
+  repo["JpaReturnRequestRepository"]
+  outbox["OutboxPublisherJob"]
+  listen["RefundTerminalListener"]
+  rmq[("RabbitMQ")]
 
-  ContainerQueue(rmq, "RabbitMQ", "AMQP", "Bus")
+  api --> app
+  app --> dom
+  app -.-> repo
+  app -.-> outbox
+  outbox -->|"ReturnApproved"| rmq
+  rmq -->|"RefundTerminal"| listen
+  listen --> dom
 
-  Rel(api, app, "ApproveReturn")
-  Rel(app, dom, "approve()")
-  Rel(app, repo, "save")
-  Rel(app, outbox, "enqueue")
-  Rel(outbox, rmq, "ReturnApproved")
-  Rel(rmq, listen, "RefundTerminal")
-  Rel(listen, dom, "applyRefundTerminal")
+  classDef layer fill:#1168bd,stroke:#0b4884,color:#fff
+  classDef infra fill:#85bbf0,stroke:#5a8fbf,color:#003
+  classDef bus fill:#438dd5,stroke:#2e6295,color:#fff
+  class api,app,dom layer
+  class repo,outbox,listen infra
+  class rmq bus
 ```
+
+主链实线（用例）；虚线 = 端口适配（持久化 / 出站）。
 
 ---
 
 ## 3.2 payment-refund
 
 ```mermaid
-C4Component
-  title Components — payment-refund
-  UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="1")
+flowchart TB
+  rmqIn[("RabbitMQ")]
+  listen["ReturnApprovedListener"]
+  start["StartRefundFromReturnApproved"]
+  exec["ExecuteRefundHandler"]
+  dom["Refund + ExternalExecution<br/><i>domain</i>"]
+  psp["StubPspRefundClient"]
+  cb["PspCallbackController"]
+  outbox["OutboxPublisherJob"]
+  repo["JpaRefundRepository"]
+  rmqOut[("RabbitMQ")]
 
-  Container_Boundary(pr, "payment-refund :8082") {
-    Component(listen, "ReturnApprovedListener", "infrastructure", "Inbound event")
-    Component(start, "StartRefund…Handler", "application", "Create PENDING refund")
-    Component(exec, "ExecuteRefundHandler", "application", "Call PSP port")
-    Component(dom, "Refund + ExternalExecution", "domain", "Lifecycle")
-    Component(psp, "StubPspRefundClient", "infrastructure", "PSP ACL")
-    Component(cb, "PspCallbackController", "interfaces", "Record result")
-    Component(outbox, "OutboxPublisherJob", "infrastructure", "Publish RefundTerminal")
-    Component(repo, "JpaRefundRepository", "infrastructure", "Persistence")
-  }
+  rmqIn -->|"ReturnApproved"| listen
+  listen --> start
+  start --> dom
+  start -.-> repo
+  start --> exec
+  exec --> psp
+  cb --> dom
+  cb -.-> outbox
+  outbox -->|"RefundTerminal"| rmqOut
 
-  ContainerQueue(rmq, "RabbitMQ", "AMQP", "Bus")
-
-  Rel(rmq, listen, "ReturnApproved")
-  Rel(listen, start, "handle")
-  Rel(start, dom, "createPending")
-  Rel(start, repo, "save")
-  Rel(start, exec, "then execute")
-  Rel(exec, psp, "refund()")
-  Rel(cb, dom, "recordResult")
-  Rel(cb, outbox, "enqueue")
-  Rel(outbox, rmq, "RefundTerminal")
+  classDef layer fill:#1168bd,stroke:#0b4884,color:#fff
+  classDef infra fill:#85bbf0,stroke:#5a8fbf,color:#003
+  classDef bus fill:#438dd5,stroke:#2e6295,color:#fff
+  class start,exec,dom,cb layer
+  class listen,psp,outbox,repo infra
+  class rmqIn,rmqOut bus
 ```
+
+入站事件在上，回调与出站在下；仍是单向下流，无左右对打。
 
 ---
 
-## 依赖方向（每个服务内）
+## 依赖方向
 
 ```text
 interfaces / infrastructure  →  application  →  domain
@@ -75,9 +83,9 @@ interfaces / infrastructure  →  application  →  domain
 
 | Ontology（模拟） | 落点 |
 |------------------|------|
-| Action `ApproveReturn` | `ApproveReturnHandler` + `ReturnRequest.approve` |
-| 跨对象 edit-set | 本地事务 + `ReturnApproved`（非单库原子） |
-| ExternalExecution | 领域实体 + `StubPspRefundClient` |
-| 预分配 `refundId` | 审批铸 ID → 同 ID 建 `Refund` |
+| `ApproveReturn` | Handler + `ReturnRequest.approve` |
+| edit-set | 本地 TX + `ReturnApproved` |
+| ExternalExecution | 领域实体 + Stub PSP |
+| 预分配 `refundId` | 审批铸 ID → 同 ID 建 Refund |
 
 时序 → [04-dynamic-approve-refund.md](./04-dynamic-approve-refund.md)

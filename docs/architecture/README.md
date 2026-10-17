@@ -1,21 +1,23 @@
-# 架构总览（C4）
+# 架构总览（C4 Model）
 
-用 [C4 Model](https://c4model.com/) 说明 NovaShop。图做了**拆分与减线**：同一层用多张窄图代替一张蜘蛛网，GitHub Mermaid 更易读。
+文档遵循 [C4 Model](https://c4model.com/) 的抽象层级（Context → Container → Component → Dynamic），但**绘图语法不用 Mermaid 原生 `C4*`**。
 
-| 层级 | 文档 | 看什么 |
-|------|------|--------|
-| 1 Context | [01-context.md](./01-context.md) | 人、系统边界、概念上的 PSP |
-| 2 Container | [02-container.md](./02-container.md) | ① HTTP 同步面 · ② 异步事件面（分两张） |
-| 3 Component | [03-component-return-refund.md](./03-component-return-refund.md) | order-return / payment-refund 各一张竖向分层 |
-| Dynamic | [04-dynamic-approve-refund.md](./04-dynamic-approve-refund.md) | 审批→退款→回调（sequence，比 C4Dynamic 更整洁） |
+原因：`C4Context` / `C4Container` 等在 Mermaid 里仍是实验特性，GitHub 渲染时自动布线容易交叉缠绕，几乎无法精细控布局（见 [Mermaid C4 说明](https://mermaid.js.org/syntax/c4.html)）。  
+本仓做法（与常见工程实践一致）：
 
-**不做 Code 级 C4** → [handbook/03-layered-code-tour.md](../handbook/03-layered-code-tour.md)  
-**不做生产 Deployment** → [handbook/05-runbook-docker.md](../handbook/05-runbook-docker.md)
+| 视图 | 画法 | 为何 |
+|------|------|------|
+| Context / Container / Component | `flowchart` + `subgraph` 分层 | 声明顺序 ≈ 视觉层次，线少、方向单一 |
+| Dynamic（协作） | `sequenceDiagram` | 天生适合编号步骤，无蜘蛛网 |
 
-`platform/` 是事件契约共享模块，**不是**可部署容器。
+| 文档 | 内容 |
+|------|------|
+| [01-context.md](./01-context.md) | 系统上下文 |
+| [02-container.md](./02-container.md) | 容器：HTTP 面 · 异步面 · 持久化说明 |
+| [03-component-return-refund.md](./03-component-return-refund.md) | 售后两服务的分层组件 |
+| [04-dynamic-approve-refund.md](./04-dynamic-approve-refund.md) | 审批→退款时序 |
 
-诚实边界：
+**不做 Code 级图** → [handbook/03](../handbook/03-layered-code-tour.md)  
+**不做生产 Deployment** → [handbook/05](../handbook/05-runbook-docker.md)
 
-- 图上的 PSP 在实现里是 `payment-refund` 内嵌 Stub（对齐 Ontology ExternalExecution）
-- 退货创建经 **demo-web 种子**，非正式跨 BC HTTP ACL
-- Spring 服务模拟 Ontology 动能，不是真实 Foundry 引擎
+诚实边界：PSP 课内为 Stub；退货创建经 demo-web 种子；非真实 Foundry 引擎。

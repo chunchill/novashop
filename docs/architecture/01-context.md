@@ -1,36 +1,40 @@
-# C4 Level 1 · System Context
+# Level 1 · System Context
 
-NovaShop 是**教学用**迷你电商标本：在权威微服务内模拟 Foundry Ontology 动能，并用 DDD 限界上下文拆分售后与履约。
+NovaShop：教学用迷你电商标本（Ontology 动能概念的分布式近似 + DDD 限界上下文）。
+
+阅读方向：**上 → 下**（人 → 系统 → 外部副作用）。
 
 ```mermaid
-C4Context
-  title System Context — NovaShop
-  UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+flowchart TB
+  shopper(["Shopper"])
+  agent(["Support agent"])
 
-  Person(shopper, "Shopper", "Catalog, checkout, track fulfillment")
-  Person(agent, "Support agent", "Approve returns; simulate PSP callback")
+  novashop["NovaShop<br/><i>Compose teaching stack</i>"]
 
-  System(novashop, "NovaShop", "Teaching shop (Compose stack)")
+  psp(["PSP<br/><i>conceptual · stub in lab</i>"])
 
-  System_Ext(psp, "PSP", "Refund side effect (stub in lab)")
+  shopper -->|"HTTPS :8080"| novashop
+  agent -->|"HTTPS :8080"| novashop
+  novashop -->|"ExecuteRefund / callback"| psp
 
-  Rel(shopper, novashop, "Uses storefront", "HTTPS :8080")
-  Rel(agent, novashop, "Uses agent console", "HTTPS :8080")
-  Rel(novashop, psp, "Execute refund / callbacks", "ACL (stub)")
+  classDef person fill:#08427b,stroke:#052e56,color:#fff
+  classDef system fill:#1168bd,stroke:#0b4884,color:#fff
+  classDef ext fill:#999999,stroke:#666666,color:#fff
+  class shopper,agent person
+  class novashop system
+  class psp ext
 ```
 
-## 读图要点
+## 读图
 
 | 元素 | 含义 |
 |------|------|
-| Shopper / Agent | 都走 `demo-web`（:8080） |
+| Shopper / Agent | 都经 `demo-web` |
 | NovaShop | 本仓全部可部署服务 + Postgres + RabbitMQ |
-| PSP | 概念外部；课内为 Stub → Container 图 |
+| PSP | 概念外部；实现为 `StubPspRefundClient` |
 
 ## 非目标
 
-- 真实 Foundry Ontology / OSDK  
-- 完整 IAM（仅 `X-Actor-*` 头）  
-- 独立 Payment 捕获 BC（`paymentId` 由 commerce mint）
+真实 Foundry / OSDK · 完整 IAM · 独立 Payment 捕获 BC  
 
 下一层 → [02-container.md](./02-container.md)
