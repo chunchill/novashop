@@ -1,36 +1,36 @@
 # C4 Level 1 · System Context
 
-NovaShop 是一套**教学用**迷你电商标本：在权威微服务内模拟 Foundry Ontology 的动能概念，并用 DDD 限界上下文拆分售后与履约。
+NovaShop 是**教学用**迷你电商标本：在权威微服务内模拟 Foundry Ontology 动能，并用 DDD 限界上下文拆分售后与履约。
 
 ```mermaid
 C4Context
-  title System Context - NovaShop
+  title System Context — NovaShop
+  UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 
-  Person(shopper, "Shopper", "Browse catalog and place orders")
-  Person(agent, "Support agent", "Review returns; X-Actor headers")
+  Person(shopper, "Shopper", "Catalog, checkout, track fulfillment")
+  Person(agent, "Support agent", "Approve returns; simulate PSP callback")
 
-  System(novashop, "NovaShop", "Teaching shop: catalog, order, fulfill, return, refund")
+  System(novashop, "NovaShop", "Teaching shop (Compose stack)")
 
-  System_Ext(psp, "Payment service provider", "Refund execution; stubbed inside payment-refund for labs")
+  System_Ext(psp, "PSP", "Refund side effect (stub in lab)")
 
-  Rel(shopper, novashop, "Places orders, views fulfillment", "HTTPS :8080")
-  Rel(agent, novashop, "Approves returns, simulates PSP callback", "HTTPS :8080")
-  Rel(novashop, psp, "ExecuteRefund / record callback", "HTTP ACL (stub)")
+  Rel(shopper, novashop, "Uses storefront", "HTTPS :8080")
+  Rel(agent, novashop, "Uses agent console", "HTTPS :8080")
+  Rel(novashop, psp, "Execute refund / callbacks", "ACL (stub)")
 ```
 
 ## 读图要点
 
 | 元素 | 含义 |
 |------|------|
-| Shopper | 经 `demo-web` 看目录、下单、看履约 |
-| Support agent | 经同一 UI 申请/审批退货；演示「Simulate PSP callback」 |
-| NovaShop | 本仓库全部可部署服务 + Postgres + RabbitMQ |
-| PSP（外部） | 概念上的支付侧效应；**课内实现为 Stub**，见 Container 图 |
+| Shopper / Agent | 都走 `demo-web`（:8080） |
+| NovaShop | 本仓全部可部署服务 + Postgres + RabbitMQ |
+| PSP | 概念外部；课内为 Stub → Container 图 |
 
-## 非目标（Context 外）
+## 非目标
 
-- 真实 Foundry Ontology / OSDK
-- 完整 IAM（仅 `X-Actor-Id` / `X-Actor-Role` 头）
+- 真实 Foundry Ontology / OSDK  
+- 完整 IAM（仅 `X-Actor-*` 头）  
 - 独立 Payment 捕获 BC（`paymentId` 由 commerce mint）
 
 下一层 → [02-container.md](./02-container.md)
